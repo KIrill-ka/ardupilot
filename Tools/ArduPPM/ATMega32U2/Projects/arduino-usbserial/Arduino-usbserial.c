@@ -35,8 +35,38 @@
  */
 
 #include "Arduino-usbserial.h"
-#include "../../../Libraries/PPM_Encoder.h"
 
+#ifdef SBUS_ENCODER
+#include "../../../Libraries/PPM_Encoder_sbus.h"
+#else
+#include "../../../Libraries/PPM_Encoder.h"
+#endif
+
+
+#ifdef SBUS_ENCODER
+static inline uint8_t buffer_flush_timeout(void) {
+ return TIFR1 & (1 << OCF1B);
+}
+static inline uint8_t buffer_timer_reset(void) {
+ TIFR1 = 1 << OCF1B;
+ cli(); /* avoid race condition with PPM encoder in 16-bit TCNT1 access */
+ OCR1B = TCNT1 + 8192; /* +4.1ms */
+ sei();
+}
+static inline void buffer_timer_start(void) {
+ /* started in PPM_Encoder_sbus.h */
+}
+#else
+static inline uint8_t buffer_flush_timeout(void) {
+ return TIFR0 & (1 << TOV0);
+}
+static inline void buffer_timer_reset(void) {
+ TIFR0 = 1 << TOV0;
+}
+static inline void buffer_timer_start(void) {
+ TCCR0B = 1 << CS02; 
+}
+#endif
 
 /** Circular buffer to hold data from the host before it is sent to the device via the serial port. */
 RingBuff_t USBtoUSART_Buffer;
@@ -111,9 +141,10 @@ int main(void)
 		
 		// Check if the UART receive buffer flush timer has expired or the buffer is nearly full
 		RingBuff_Count_t BufferCount = RingBuffer_GetCount(&USARTtoUSB_Buffer);
-		if ((TIFR0 & (1 << TOV0)) || (BufferCount > BUFFER_NEARLY_FULL))
+		if (buffer_flush_timeout() || (BufferCount > BUFFER_NEARLY_FULL))
 		{
-			TIFR0 |= (1 << TOV0);
+			
+            if(buffer_flush_timeout()) buffer_timer_reset();
 
 			if (USARTtoUSB_Buffer.Count) {
 				LEDs_TurnOnLEDs(LEDMASK_TX);
@@ -141,6 +172,9 @@ int main(void)
 			PulseMSRemaining.RxLEDPulse = TX_RX_LED_PULSE_MS;
 		}
 		
+#ifdef SBUS_ENCODER
+        sbus_frame_task();
+#endif
 		CDC_Device_USBTask(&VirtualSerial_CDC_Interface);
 		USB_USBTask();
 	}
@@ -162,7 +196,7 @@ void SetupHardware(void)
 	USB_Init();
 
 	/* Start the flush timer so that overflows occur rapidly to push received bytes to the USB interface */
-	TCCR0B = (1 << CS02);
+	buffer_timer_start();
 	
 	/* Pull target /RESET line high */
 	AVR_RESET_LINE_PORT |= AVR_RESET_LINE_MASK;
