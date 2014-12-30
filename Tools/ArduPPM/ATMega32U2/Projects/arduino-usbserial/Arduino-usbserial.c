@@ -47,7 +47,7 @@
 static inline uint8_t buffer_flush_timeout(void) {
  return TIFR1 & (1 << OCF1B);
 }
-static inline uint8_t buffer_timer_reset(void) {
+static inline void buffer_timer_reset(void) {
  TIFR1 = 1 << OCF1B;
  cli(); /* avoid race condition with PPM encoder in 16-bit TCNT1 access */
  OCR1B = TCNT1 + 8192; /* +4.1ms */
