@@ -10,6 +10,10 @@ There are several modifications
 
 4. Removal of the !!! CLI feature of the stk500v2 bootloader
 
+5. EEPROM read is removed to fit bootloader into 2k
+
+6. Fixed bug with incorrect firmware size limit.
+
 LED patterns to look for:
 
 USB Connected, no traffic:
