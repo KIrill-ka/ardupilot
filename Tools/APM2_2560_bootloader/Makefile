@@ -124,7 +124,7 @@ CINCS =
 CFLAGS = -g$(DEBUG)
 CFLAGS += $(CDEFS) $(CINCS)
 CFLAGS += -O$(OPT)
-CFLAGS += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -mno-tablejump 
+CFLAGS += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums  -fno-jump-tables
 CFLAGS += -Wall -Wstrict-prototypes
 CFLAGS += -Wa,-adhlns=$(<:.c=.lst)
 CFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
@@ -337,7 +337,8 @@ mega1280: begin gccversion sizebefore build sizeafter end
 #	Jul 6,	2010	<MLS> Adding 2560 support
 mega2560:	MCU = atmega2560
 mega2560:	F_CPU = 16000000
-mega2560:	BOOTLOADER_ADDRESS = 3E000
+#mega2560:	BOOTLOADER_ADDRESS = 3E000
+mega2560:	BOOTLOADER_ADDRESS = 3F800
 mega2560:	CFLAGS += -D_MEGA_BOARD_
 mega2560:	begin gccversion sizebefore build sizeafter end 
 			mv $(TARGET).hex stk500boot_v2_mega2560.hex

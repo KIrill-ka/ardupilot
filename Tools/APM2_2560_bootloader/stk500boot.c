@@ -219,17 +219,11 @@ LICENSE:
 #define CONFIG_PARAM_SW_MINOR			0x0A
 
 /*
- * Calculate the address where the bootloader starts from FLASHEND and BOOTSIZE
- * (adjust BOOTSIZE below and BOOTLOADER_ADDRESS in Makefile if you want to change the size of the bootloader)
+ * Adjust BOOTSIZE below and BOOTLOADER_ADDRESS in Makefile if you want to change the size of the bootloader
  */
-//#define BOOTSIZE 1024
-#if FLASHEND > 0x0F000
-	#define BOOTSIZE 8192
-#else
-	#define BOOTSIZE 2048
-#endif
+#define BOOTSIZE 2048
 
-#define APP_END  (FLASHEND -(2*BOOTSIZE) + 1)
+#define APP_END  (FLASHEND - BOOTSIZE + 1)
 
 /*
  * Signature bytes are not available in avr-gcc io_xxx.h
@@ -1011,6 +1005,7 @@ int main(void)
 						}
 						else
 						{
+#if 0
 							/* Read EEPROM */
 							do {
 								EEARL	=	address;			// Setup EEPROM address
@@ -1020,6 +1015,7 @@ int main(void)
 								*p++	=	EEDR;				// Send EEPROM data
 								size--;
 							} while (size);
+#endif
 						}
 						*p++	=	STATUS_CMD_OK;
 					}
