@@ -4,10 +4,13 @@ Instructions:
 Make sure you have the latest avr-gcc / winavr installed.
 Unzip the project and go to the < ./Projects/arduino-usbserial/ > directory.
 
-To compile the project type (makefile is set for atmega16u2):
+To compile the project type (makefile is set for atmega32u2):
 
 >make clean
 >make
+
+To build s.bus firmware:
+> make BUILD_OPTS=-DSBUS_ENCODER
 
 Uploading firmware to atmega32u2 using the DFU bootloader (see ../arduino-usbserial/readme.txt for instructions).
 
