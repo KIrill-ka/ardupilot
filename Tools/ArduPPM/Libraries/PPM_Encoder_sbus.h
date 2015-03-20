@@ -648,7 +648,7 @@ void sbus_frame_task(void)
 
 
     if(sbus_state != SBUS_FRAME_READY) return;
-    if(sbus_data[0] != 0xf || sbus_data[24] != 0) {
+    if(sbus_data[0] != 0xf /*|| sbus_data[24] != 0 ignore to support newer S.BUS versions */) {
      DEBUG_ERROR(ERR_FERR);
      PORTC &= ~(1<<PINC7); /* turn on */
      servo_input_errors = 1;
